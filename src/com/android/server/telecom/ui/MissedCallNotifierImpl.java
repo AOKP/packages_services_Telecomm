@@ -61,7 +61,9 @@ import android.provider.Settings;
 import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.UserHandle;
+import android.provider.CallLog;
 import android.provider.CallLog.Calls;
+import android.provider.Settings;
 import android.telecom.DefaultDialerManager;
 import android.telecom.DisconnectCause;
 import android.telecom.PhoneAccount;
@@ -362,18 +364,29 @@ public class MissedCallNotifierImpl extends CallsManagerListenerBase implements 
 
         // Create the notification suitable for display when sensitive information is showing.
         Notification.Builder builder = mNotificationBuilderFactory.getBuilder(contextForUser);
-        builder.setSmallIcon(android.R.drawable.stat_notify_missed_call)
+        if (Settings.System.getInt(mContext.getContentResolver(),
+            Settings.System.KEY_MISSED_CALL_BREATH, 0) == 1) {
+            builder.setSmallIcon(R.drawable.stat_notify_missed_call_breath)
                 .setColor(mContext.getResources().getColor(R.color.theme_color))
                 .setWhen(call.getCreationTimeMillis())
                 .setContentTitle(mContext.getText(titleResId))
                 .setContentText(expandedText)
                 .setContentIntent(createCallLogPendingIntent(userHandle))
                 .setAutoCancel(true)
+                .setDeleteIntent(createClearMissedCallsPendingIntent(userHandle));
+        } else {
+            builder.setSmallIcon(android.R.drawable.stat_notify_missed_call)
+                .setWhen(call.getCreationTimeMillis())
+                .setContentIntent(createCallLogPendingIntent(userHandle))
+                .setAutoCancel(true)
+                .setContentTitle(mContext.getText(titleResId))
+                .setContentText(expandedText)
                 .setDeleteIntent(createClearMissedCallsPendingIntent(userHandle))
                 // Include a public version of the notification to be shown when the missed call
                 // notification is shown on the user's lock screen and they have chosen to hide
                 // sensitive notification information.
                 .setPublicVersion(publicBuilder.build());
+             }
 
         Uri handleUri = call.getHandle();
         String handle = handleUri == null ? null : handleUri.getSchemeSpecificPart();
