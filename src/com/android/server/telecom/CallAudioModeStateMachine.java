@@ -300,7 +300,7 @@ public class CallAudioModeStateMachine extends StateMachine {
             boolean setMsimAudioParams = SystemProperties
                     .getBoolean("ro.multisim.set_audio_params", false);
             boolean setRealcallAudioParams = SystemProperties
-                    .getBoolean("ro.telephony.samsung.realcall", false)
+                    .getBoolean("ro.telephony.samsung.realcall", false);
             Call call = mCallAudioManager.getForegroundCall();
 
             mAudioManager.requestAudioFocusForCall(AudioManager.STREAM_VOICE_CALL,
